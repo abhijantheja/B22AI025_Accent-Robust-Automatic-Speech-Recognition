@@ -682,8 +682,6 @@ def main():
 
     logger.info("\n=== ALL DONE ===")
     logger.info(f"Outputs: {eval_dir}/")
-    logger.info("Next: python scripts/update_report_numbers.py")
-
     print("\n--- Numbers for your report ---")
     for name, m in res["summary"].items():
         print(f"  {name}: WER={m['wer_pct']:.1f}%  DeltaWERmax={m['delta_wer_max_pct']:.1f}%")

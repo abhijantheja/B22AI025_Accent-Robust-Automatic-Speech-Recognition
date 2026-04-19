@@ -49,7 +49,7 @@ IIT Jodhpur\\
 \maketitle
 
 \begin{abstract}
-Modern Automatic Speech Recognition (ASR) systems exhibit significant performance disparity across accent groups, with Word Error Rates (WER) for non-native accents often 2--4$\times$ higher than for native speakers. We propose an \textit{accent-robust} ASR framework combining Wav2Vec 2.0 self-supervised representations with Domain-Adversarial Training (DAT). A Gradient Reversal Layer (GRL) encourages the encoder to learn accent-invariant phonetic representations, while a supervised accent classifier provides an additional regularization signal. We further introduce accent-stratified sampling to prevent majority-accent dominance. Evaluated on LibriSpeech, CommonVoice, and L2-ARCTIC, our method reduces overall WER from 28.0\% (baseline) to 18.1\%, and reduces $\Delta$WERmax—our primary fairness metric—from 24.7\% to 16.1\%, demonstrating improved both performance and fairness across 8 accent groups. We also provide Grad-CAM explainability analysis and a comprehensive intersectional fairness audit.
+Modern Automatic Speech Recognition (ASR) systems exhibit significant performance disparity across accent groups, with Word Error Rates (WER) for non-native accents often 2--4$\times$ higher than for native speakers. We propose an \textit{accent-robust} ASR framework combining Wav2Vec 2.0 self-supervised representations with Domain-Adversarial Training (DAT). A Gradient Reversal Layer (GRL) encourages the encoder to learn accent-invariant phonetic representations, while a supervised accent classifier provides an additional regularization signal. We further introduce accent-stratified sampling to prevent majority-accent dominance. In the checked-in evaluation summary, the adversarial model improves overall WER from 27.96\% to 18.15\% and reduces $\Delta$WERmax from 24.73\% to 16.10\%. We also include fairness-oriented analysis utilities and Grad-CAM support for model inspection.
 \end{abstract}
 
 %------------------------------------------------------------------------
@@ -63,7 +63,7 @@ In this paper we address all three problems within a unified framework:
 \begin{itemize}
     \item We combine Wav2Vec 2.0 with a Gradient Reversal Layer (GRL)~\cite{ganin2016domain} for domain-adversarial training that explicitly removes accent information from encoder representations.
     \item We introduce accent-stratified sampling to ensure balanced gradient signals during training.
-    \item We perform a comprehensive Responsible AI analysis including $\Delta$WERmax fairness evaluation, intersectional analysis (accent $\times$ gender $\times$ age), and Grad-CAM explainability visualizations.
+    \item We provide fairness evaluation utilities centered on $\Delta$WERmax together with optional intersectional and Grad-CAM analysis components.
 \end{itemize}
 
 %------------------------------------------------------------------------
@@ -177,7 +177,7 @@ We compare against:
 
 \subsection{Implementation Details}
 
-All models use PyTorch~\cite{paszke2019pytorch} and HuggingFace Transformers~\cite{wolf2020transformers}. Mixed-precision training (FP16) with gradient clipping (max norm 1.0). Batch size 8, accumulated over 4 steps (effective batch 32). AdamW optimizer~\cite{loshchilov2018decoupled} with $\beta_1=0.9$, $\beta_2=0.98$, weight decay $10^{-4}$. Trained on single NVIDIA A100 40GB GPU. Audio resampled to 16kHz; maximum duration 20 seconds.
+All models use PyTorch~\cite{paszke2019pytorch} and HuggingFace Transformers~\cite{wolf2020transformers}. Mixed-precision training (FP16) with gradient clipping (max norm 1.0). Batch size 8, accumulated over 4 steps (effective batch 32). AdamW optimizer~\cite{loshchilov2018decoupled} with $\beta_1=0.9$, $\beta_2=0.98$, weight decay $10^{-4}$. Audio is resampled to 16kHz with a maximum duration of 20 seconds. The codebase is designed to run on GPU-equipped systems, while the lightweight demo workflow can also be run on CPU.
 
 \subsection{Evaluation Metrics}
 
@@ -196,19 +196,19 @@ Lower $\Delta\text{WER}_\text{max}$ indicates more equitable performance.
 
 \subsection{Overall WER Comparison}
 
-Table~\ref{tab:overall_wer} shows the overall WER and fairness metrics for all models evaluated on the combined L2-ARCTIC + CommonVoice test sets.
+Table~\ref{tab:overall_wer} summarizes the checked-in evaluation metrics used throughout this report.
 
 \begin{table*}[t]
 \centering
-\caption{WER (\%) comparison across models and accent groups (bold = best per column). Evaluated on LibriSpeech, CommonVoice, and L2-ARCTIC test sets across 8 accent groups.}
+\caption{WER (\%) comparison across models and accent groups from the checked-in evaluation summary. Bold = best per column.}
 \label{tab:main_results}
 \begin{tabular}{l cc cccccc}
 \toprule
 \textbf{Model} & \textbf{WER} & \textbf{$\Delta$WERmax} & \textbf{american} & \textbf{arabic} & \textbf{british} & \textbf{east asian} & \textbf{european} & \textbf{indian} \\
 \midrule
-Baseline (P0) & 28.0 & 24.7 & 20.8 & 21.6 & 24.1 & 16.3 & 41.1 & 16.8 \\
-Accent-Adapted (P1) & 20.3 & 19.0 & 19.1 & 18.9 & 21.4 & 14.3 & 33.4 & 14.9 \\
-Adversarial (Ours) & \textbf{18.1} & \textbf{16.1} & \textbf{18.7} & \textbf{16.6} & \textbf{19.4} & \textbf{12.5} & \textbf{28.6} & \textbf{13.2} \\
+Baseline (P0) & 27.96 & 24.73 & 20.83 & 21.62 & 24.15 & 16.33 & 41.06 & 16.81 \\
+Accent-Adapted (P1) & 20.33 & 19.04 & 19.08 & 18.90 & 21.41 & 14.34 & 33.38 & 14.87 \\
+Adversarial (Ours) & \textbf{18.15} & \textbf{16.10} & \textbf{18.68} & \textbf{16.56} & \textbf{19.42} & \textbf{12.49} & \textbf{28.59} & \textbf{13.15} \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -222,15 +222,15 @@ Adversarial (Ours) & \textbf{18.1} & \textbf{16.1} & \textbf{18.7} & \textbf{16.
 \label{fig:wer_plots}
 \end{figure*}
 
-The largest relative improvements are for Chinese (−46.8\%) and Korean (−39.9\%) accent groups, which had the highest baseline WER. American English degrades minimally (−14.5\%), confirming that accent invariance is achieved without harming native-accent performance.
+The checked-in summary shows consistent improvements from the baseline to the accent-adapted and adversarial models. The largest gains appear on the highest-WER accent groups, while the lower-WER groups remain comparatively stable across phases.
 
 \subsection{Ablation Study}
 
-Table~\ref{tab:ablation} ablates the contribution of each component.
+The current repository focuses on the end-to-end phase comparison shown above. A fuller ablation study remains a natural next step once the training pipeline is rerun on a larger GPU setup.
 
 \begin{table}[h]
 \centering
-\caption{Ablation study on L2-ARCTIC test set.}
+\caption{Illustrative ablation template for future controlled experiments.}
 \label{tab:ablation}
 \begin{tabular}{lccc}
 \toprule
@@ -249,14 +249,14 @@ $\lambda_a = 2.0$ & 18.9 & 13.1 \\
 \end{tabular}
 \end{table}
 
-Each component contributes meaningfully. Stratified sampling alone reduces $\Delta$WERmax by 2.5 points; adding the GRL provides a further 4.2-point improvement. The supervised accent head (+0.8 points WER, +1.6 $\Delta$WERmax) provides an important regularization signal that prevents the GRL from causing encoder collapse.
+This table is included as a template for future controlled comparisons. The codebase already separates the relevant components --- stratified sampling, the supervised accent head, and the GRL --- so these ablations can be rerun cleanly after the main training workflow is reproduced on GPU.
 
 %------------------------------------------------------------------------
 \section{Responsible AI Analysis}
 
 \subsection{Fairness: $\Delta$WERmax}
 
-Our primary fairness evaluation uses $\Delta\text{WER}_\text{max}$. Our adversarial model reduces $\Delta\text{WER}_\text{max}$ from 24.73\% to 16.10\%—a 34.9\% relative improvement. European and Arabic accents see the largest absolute gains, while American English degrades minimally (2.1 pp), confirming accent invariance without penalising native-accent speakers.
+Our primary fairness evaluation uses $\Delta\text{WER}_\text{max}$. In the checked-in evaluation summary, the adversarial model reduces $\Delta\text{WER}_\text{max}$ from 24.73\% to 16.10\%, with the largest improvements concentrated in the highest-WER accent groups.
 
 \begin{figure}[h]
 \centering
@@ -267,54 +267,29 @@ Our primary fairness evaluation uses $\Delta\text{WER}_\text{max}$. Our adversar
 
 \subsection{Inclusiveness: Intersectional Analysis}
 
-We perform intersectional analysis across accent $\times$ gender groups using speaker metadata from CommonVoice. Figure~\ref{fig:intersectional} shows WER heatmaps for all accent-gender combinations across both models. Table~\ref{tab:intersectional} highlights the four highest-disparity groups.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{intersectional_fairness.png}
-\caption{Intersectional fairness heatmaps (Accent $\times$ Gender). \textbf{Left:} Baseline WER shows strong compounded bias for female non-native speakers. \textbf{Centre:} Adversarial model uniformly reduces WER across all groups. \textbf{Right:} WER improvement in percentage points—green = larger reduction. Female European and Arabic speakers benefit most.}
-\label{fig:intersectional}
-\end{figure*}
-
-\begin{table}[h]
-\centering
-\caption{Intersectional WER (\%): Accent $\times$ Gender. Female speakers in non-native accent groups show disproportionate improvement.}
-\label{tab:intersectional}
-\begin{tabular}{lcc}
-\toprule
-\textbf{Group (Accent\_Gender)} & \textbf{Baseline} & \textbf{Ours} \\
-\midrule
-Korean\_Female   & 44.2 & 24.8 \\
-Chinese\_Female  & 45.7 & 23.1 \\
-Korean\_Male     & 38.1 & 23.7 \\
-Arabic\_Female   & 40.3 & 21.2 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Female non-native speakers, who face \textit{compounded} bias (both accent and gender), show the largest absolute improvements. Our method's accent invariance partially alleviates this intersectional disadvantage.
+The repository includes utilities for breaking down WER by accent, gender, and age when those metadata are available. That makes it straightforward to extend the current evaluation summary into a more detailed intersectional audit on a future full-data rerun.
 
 \subsection{Explainability: Grad-CAM Analysis}
 
-We use Grad-CAM~\cite{selvaraju2017gradcam} to identify which temporal regions of speech most influence the accent classifier's predictions. Key observations: (1) \textbf{Consonant clusters} (e.g., retroflex consonants in Indian English) drive accent classification the most, explaining why WER improvements concentrate at word boundaries. (2) After adversarial training, Grad-CAM attention shifts away from accent-specific phonemes toward prosodic features, confirming the GRL successfully redirects encoder attention. (3) High-WER segments correlate with strong Grad-CAM activations at word-initial positions, suggesting accent-related errors concentrate at onset phonemes.
+We include a Grad-CAM workflow~\cite{selvaraju2017gradcam} to inspect which temporal regions of speech most influence the accent classifier. This is intended as a qualitative debugging and interpretation tool for future reruns rather than a standalone quantitative claim.
 
 \subsection{Robustness}
 
-Accent-stratified sampling ensures that gradient updates are balanced across all 8 accent groups regardless of dataset imbalance. Without stratification, the Chinese and Korean accent groups (with fewest CommonVoice samples) showed 3--5\% higher WER, confirming that naive mixing amplifies representation bias.
+Accent-stratified sampling ensures that gradient updates are balanced across accent groups despite dataset imbalance. In practice, this keeps minority-accent examples visible throughout fine-tuning instead of letting majority accents dominate the updates.
 
 %------------------------------------------------------------------------
 \section{Discussion}
 
 \textbf{Why does adversarial training help?} The GRL prevents the encoder from using accent-correlated features as shortcuts for phoneme prediction. This forces it to rely on acoustic-phonetic features that generalize across accents—analogous to how data augmentation forces models to rely on robust features.
 
-\textbf{Limitations.} (1) Our model still relies on accent labels for the supervised head, which may not be available in all settings. Future work should explore unsupervised accent embeddings. (2) We evaluate on 8 accent groups; extending to code-switched speech and low-resource languages remains an open challenge. (3) A 16.1\% $\Delta$WERmax gap persists; addressing it may require more diverse training data rather than architectural changes alone.
+\textbf{Limitations.} (1) Our model still relies on accent labels for the supervised head, which may not be available in all settings. Future work should explore unsupervised accent embeddings. (2) Extending the evaluation to code-switched speech and low-resource languages remains an open challenge. (3) A 16.1\% $\Delta$WERmax gap persists in the checked-in evaluation summary, suggesting that more diverse training data may be as important as architectural changes.
 
 \textbf{Societal Impact.} Accent bias in ASR systems creates barriers for non-native speakers in voice-based services (smart assistants, voice search, phone banking). Our method directly addresses this by improving WER for underrepresented groups while preserving native-accent performance, contributing to more equitable voice AI.
 
 %------------------------------------------------------------------------
 \section{Conclusion}
 
-We presented an accent-robust ASR framework combining Wav2Vec 2.0 with domain-adversarial training via a Gradient Reversal Layer. Our method reduces overall WER by 35\% and the $\Delta$WERmax fairness gap by 34.9\% compared to a strong baseline, evaluated across 8 accent groups. Ablation studies confirm that GRL adversarial training, accent-stratified sampling, and supervised accent auxiliary loss each contribute meaningfully. Grad-CAM analysis confirms that the GRL redirects encoder attention away from accent-specific phonemes toward more generalizable speech features. We release all code and manifests to enable reproducibility and future research.
+We presented an accent-robust ASR framework combining Wav2Vec 2.0 with domain-adversarial training via a Gradient Reversal Layer. In the checked-in evaluation summary, the adversarial model improves both overall WER and the $\Delta$WERmax fairness gap relative to the baseline. The repository is structured to support fuller reruns, controlled ablations, and qualitative Grad-CAM inspection on a larger GPU setup.
 
 %------------------------------------------------------------------------
 {\small
