@@ -1,0 +1,48 @@
+# Phase 2: Domain-Adversarial Training Configuration
+# Wav2Vec 2.0 + GRL for accent-invariant representation learning
+
+# Model
+model_name: "facebook/wav2vec2-base"
+vocab_size: 32
+num_accents: 8
+freeze_feature_extractor: false  # Unfreeze for adversarial fine-tuning
+
+# Data (accented speech datasets)
+train_manifest: "data/manifests/accented_train.jsonl"
+val_manifest: "data/manifests/accented_val.jsonl"
+test_manifest: "data/manifests/accented_test.jsonl"
+max_duration: 20.0
+
+# Training - Phase 1 (accent adaptation, no adversarial)
+num_epochs_phase1: 5
+finetune_lr: 3.0e-5
+
+# Training - Phase 2 (adversarial)
+num_epochs: 20
+batch_size: 8
+adversarial_lr: 1.0e-4
+learning_rate: 1.0e-4
+weight_decay: 1.0e-4
+warmup_steps: 1000
+fp16: true
+num_workers: 4
+gradient_accumulation_steps: 4
+max_grad_norm: 1.0
+
+# Loss weights
+blank_id: 0
+lambda_sup: 0.1     # Supervised accent classification weight
+lambda_adv: 1.0     # Adversarial (GRL) weight
+use_adversarial: true
+
+# GRL alpha annealing (Ganin et al. schedule)
+grl_gamma: 10.0     # Annealing rate
+grl_alpha_max: 1.0  # Maximum alpha value
+
+# Sampling
+use_stratified_sampling: true
+
+# Output
+output_dir: "results/phase2_adversarial"
+log_every_n_steps: 50
+save_every_n_epochs: 5

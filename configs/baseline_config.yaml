@@ -1,0 +1,35 @@
+# Phase 0: Baseline ASR Configuration
+# Wav2Vec 2.0 fine-tuned on LibriSpeech with CTC only
+
+# Model
+model_name: "facebook/wav2vec2-base"
+vocab_size: 32           # English characters + CTC blank + special tokens
+num_accents: 8
+freeze_feature_extractor: true
+
+# Data
+train_manifest: "data/manifests/librispeech_train.jsonl"
+val_manifest: "data/manifests/librispeech_val.jsonl"
+max_duration: 20.0
+
+# Training
+num_epochs: 10
+batch_size: 8
+learning_rate: 1.0e-4
+weight_decay: 1.0e-4
+warmup_steps: 500
+fp16: true
+num_workers: 4
+gradient_accumulation_steps: 4
+max_grad_norm: 1.0
+
+# Loss (baseline: CTC only)
+blank_id: 0
+lambda_sup: 0.0
+lambda_adv: 0.0
+use_adversarial: false
+
+# Logging
+output_dir: "results/phase0_baseline"
+log_every_n_steps: 50
+save_every_n_epochs: 2

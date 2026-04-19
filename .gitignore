@@ -1,0 +1,45 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Data (large files — do not commit raw audio)
+data/clips/
+data/wavs/
+data/*.flac
+data/*.mp3
+data/*.wav
+
+# Results / checkpoints (large)
+results/*/best_model.pt
+results/*/epoch_*.pt
+*.pt
+*.bin
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# LaTeX auxiliary
+report/*.aux
+report/*.log
+report/*.out
+report/*.synctex.gz
+report/*.bbl
+report/*.blg
