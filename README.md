@@ -96,8 +96,8 @@ project/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/abhijantheja/Accent-Robust-Automatic-Speech-Recognition.git
-cd Accent-Robust-Automatic-Speech-Recognition
+git clone https://github.com/abhijantheja/B22AI025_Accent-Robust-Automatic-Speech-Recognition.git
+cd B22AI025_Accent-Robust-Automatic-Speech-Recognition
 
 # 2. Create virtual environment
 python -m venv venv
@@ -212,26 +212,16 @@ Our adversarial model achieves a **35.1% relative WER reduction** and a **34.9% 
 
 ---
 
-## Reproducibility Checklist
+## Reproducibility Markers
 
-- [x] Random seed set to 42 in all scripts (`--seed 42`)
-- [x] All hyperparameters documented in `configs/`
-- [x] Training history saved as JSON (`training_history.json`)
-- [x] Model checkpoints saved per epoch and at best WER
-- [x] Evaluation outputs saved as CSV + JSON for exact reproduction
+- Random seed set to 42 in all scripts (`--seed 42`)
+- All hyperparameters documented in `configs/`
+- Training history saved as JSON (`training_history.json`)
+- Model checkpoints saved per epoch and at best WER
+- Evaluation outputs saved as CSV + JSON for exact reproduction
 
 ---
 
-## Citation
-
-```bibtex
-@misc{reddy2024accentasr,
-  title={Accent-Robust ASR using Wav2Vec 2.0 with Adversarial Training},
-  author={Reddy, Karan and Anwesh, Ale and Theja, Abhijan},
-  year={2024},
-  institution={IIT Jodhpur}
-}
-```
 
 ## References
 
